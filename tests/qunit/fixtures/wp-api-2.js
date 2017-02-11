@@ -1,4 +1,4 @@
-
+/* global mockedApiResponse, Backbone */
 var pathToData = {
 'wp-json/wp/v2/': mockedApiResponse.Schema,
 'wp-json/wp/v2/categories': mockedApiResponse.CategoriesCollection,
