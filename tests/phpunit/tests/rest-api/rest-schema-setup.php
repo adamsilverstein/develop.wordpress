@@ -219,7 +219,8 @@ class WP_Test_REST_Schema_Initialization extends WP_Test_REST_TestCase {
 			),
 		);
 
-		$mocked_responses = "var mockedApiResponse = {};\n\n";
+		// Set up the mocked response and tell jshint to ignore the single quote json objects
+		$mocked_responses = "/*jshint -W109 */\n\nvar mockedApiResponse = {};\n\n";
 
 		foreach( $routes_to_generate_data as $route ) {
 			$request = new WP_REST_Request( 'GET', $route['route'] );
@@ -228,7 +229,7 @@ class WP_Test_REST_Schema_Initialization extends WP_Test_REST_TestCase {
 
 			$this->assertTrue( ! empty( $data ), $route['name'] . ' route should return data.' );
 
-			$mocked_responses .= 'mockedApiResponse.' . $route['name'] . ' = ' . json_encode( $data ) . ";\n\n";
+			$mocked_responses .= 'mockedApiResponse.' . $route['name'] . ' = ' . wp_json_encode( $data ) . ";\n\n";
 		}
 
 		// Save the route object for QUnit tests.
