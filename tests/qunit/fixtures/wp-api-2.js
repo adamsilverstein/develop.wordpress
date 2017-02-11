@@ -47,5 +47,4 @@ Backbone.ajax = function ( param ) {
 
 	// Return the deferred promise that will resolve with the expected data.
 	return deferred.promise();
-
 };
