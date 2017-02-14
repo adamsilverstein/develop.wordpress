@@ -1,3 +1,4 @@
+/* global mockedApiResponse, Backbone */
 /**
  * @var mockedApiResponse defined in wp-api-generated.js
  */

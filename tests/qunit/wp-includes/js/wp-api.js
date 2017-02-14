@@ -66,7 +66,7 @@
 					theCollection,
 					'We can instantiate wp.api.collections.' + className
 				);
-				theCollection.fetch().done( function( response ) {
+				theCollection.fetch().done( function() {
 					assert.equal(
 						1,
 						theCollection.state.currentPage,
@@ -131,7 +131,7 @@
 				theModel.fetch().done( function(  ) {
 					var theModel2 = new wp.api.models[ className ]();
 					theModel2.set( 'id', theModel.attributes[0].id );
-					theModel2.fetch().done( function( response ) {
+					theModel2.fetch().done( function() {
 
 						// We were able to retrieve the model.
 						assert.equal(
@@ -174,7 +174,7 @@
 						theModel2.set( 'id', theModel.attributes[0].id );
 					}
 
-					theModel2.fetch().done( function( response ) {
+					theModel2.fetch().done( function() {
 						// We were able to retrieve the model.
 						assert.notEqual(
 							0,
