@@ -473,21 +473,30 @@ class WP_Scripts extends WP_Dependencies {
 	 */
 	public function pass_data( $handle, $object_name, $data ) {
 
-		foreach ( (array) $data as $key => $value ) {
+		// Pass scalar values untouched; pass strings through html_entity_decode.
+		if ( is_scalar( $data ) ) {
 
-			// Scalar values are passed, with strings passed thru html_entity_decode.
-			if ( is_scalar( $value ) ) {
+			// Pass strings through html_entity_decode, pass other scalar untouched.
+			if ( is_string( $data ) ) {
+				$data = html_entity_decode( $data, ENT_QUOTES, 'UTF-8');
+			}
+		} else {
+			// Recurse over passed arrays. Cast objects to arrays.
+			foreach ( (array) $data as $key => $value ) {
 
-				// Strings are html_entity_decode, other scalar values are passed untouched.
-				if ( is_string( $value ) ) {
-					$data[ $key ] = html_entity_decode( (string) $value, ENT_QUOTES, 'UTF-8');
+				// Pass scalar values untouched; pass strings through html_entity_decode.
+				if ( is_scalar( $value ) ) {
+
+					// Pass strings through html_entity_decode, pass other scalar values untouched.
+					if ( is_string( $value ) ) {
+						$data[ $key ] = html_entity_decode( $value, ENT_QUOTES, 'UTF-8');
+					} else {
+						$data[$key] = $value;
+					}
 				} else {
-					$data[ $key ] = $value;
+
+					$data = $this->entity_decode_array_values( $data );
 				}
-			} else {
-
-
-				$data = $this->entity_decode_array_values( $data );
 			}
 		}
 
@@ -528,9 +537,9 @@ class WP_Scripts extends WP_Dependencies {
 				continue;
 			}
 
-			// Strings are html_entity_decode, other scalar values are passed untouched.
+			// Pass strings through html_entity_decode, pass other scalar untouched.
 			if ( is_string( $value ) ) {
-				$data[ $key ] = html_entity_decode( (string) $value, ENT_QUOTES, 'UTF-8');
+				$data[ $key ] = html_entity_decode( $value, ENT_QUOTES, 'UTF-8');
 			} else {
 				$data[ $key ] = $value;
 			}
