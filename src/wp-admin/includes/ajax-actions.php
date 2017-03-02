@@ -101,6 +101,8 @@ function wp_ajax_fetch_list() {
 /**
  * Ajax handler for tag search.
  *
+ * @deprecated 4.8.0 Use the REST API tags endpoint instead.
+ *
  * @since 3.1.0
  */
 function wp_ajax_ajax_tag_search() {

@@ -161,6 +161,7 @@ function rest_api_register_rewrites() {
  * @since 4.4.0
  */
 function rest_api_default_filters() {
+	error_log('rest_api_default_filters');
 	// Deprecated reporting.
 	add_action( 'deprecated_function_run', 'rest_handle_deprecated_function', 10, 3 );
 	add_filter( 'deprecated_function_trigger_error', '__return_false' );
@@ -172,6 +173,11 @@ function rest_api_default_filters() {
 	add_filter( 'rest_post_dispatch', 'rest_send_allow_header', 10, 3 );
 
 	add_filter( 'rest_pre_dispatch', 'rest_handle_options_request', 10, 3 );
+
+	// Post tag search filter.
+	if ( isset( $_GET['action'] ) && 'wp-post-tag-search' === $_GET['action'] ) {
+		add_filter( 'rest_prepare_post_tag', 'wp_filter_tag_search_in_post_edit' );
+	}
 }
 
 /**

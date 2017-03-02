@@ -6219,3 +6219,17 @@ function _filter_query_attachment_filenames( $clauses ) {
 
 	return $clauses;
 }
+
+/**
+ * Filter fields returned for the post edit tag search.
+ *
+ * @param WP_REST_Response  $response  The response object.
+ *
+ * @return WP_REST_Response $response The filtered response object.
+ */
+function wp_filter_tag_search_in_post_edit( $response ) {
+	return  array(
+		'id'=>   $response->data['id'],
+		'name'=> $response->data['name'],
+	);
+}
