@@ -161,7 +161,6 @@ function rest_api_register_rewrites() {
  * @since 4.4.0
  */
 function rest_api_default_filters() {
-	error_log('rest_api_default_filters');
 	// Deprecated reporting.
 	add_action( 'deprecated_function_run', 'rest_handle_deprecated_function', 10, 3 );
 	add_filter( 'deprecated_function_trigger_error', '__return_false' );
