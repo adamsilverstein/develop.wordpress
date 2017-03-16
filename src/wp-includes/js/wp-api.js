@@ -245,10 +245,157 @@
 	};
 
 	/**
+	 * Build a helper function to retrieve related model.
+	 *
+	 * @param  {Backbone.Model} parentModel - The parent model.
+	 * @param  {int}    modelId - The model ID if the object to request
+	 * @param  {string} modelName - The model name to use when constructing the model.
+	 * @param  {string} embedSourcePoint - Where to check the embeds object for _embed data.
+	 * @param  {string} embedCheckField - Which model field to check to see if the model has data.
+	 *
+	 * @return {Deferred.promise}        A promise which resolves to the constructed model.
+	 */
+	wp.api.utils.buildModelGetter = function buildModelGetter( parentModel, modelId, modelName, embedSourcePoint, embedCheckField ) {
+		var getModel, embeddeds, attributes, deferred;
+
+		deferred  = jQuery.Deferred();
+		embeddeds = parentModel.get( '_embedded' ) || {};
+
+		// Verify that we have a valid object id.
+		if ( ! _.isNumber( modelId ) || 0 === modelId ) {
+			deferred.reject();
+			return deferred;
+		}
+
+		// If we have embedded object data, use that when constructing the getModel.
+		if ( embeddeds[ embedSourcePoint ] ) {
+			attributes = _.findWhere( embeddeds[ embedSourcePoint ], { id: modelId } );
+		}
+
+		// Otherwise use the modelId.
+		if ( ! attributes ) {
+			attributes = { id: modelId };
+		}
+
+		// Create the new getModel model.
+		getModel = new wp.api.models[ modelName ]( attributes );
+
+		// If we didn’t have an embedded getModel, fetch the getModel data.
+		if ( ! getModel.get( embedCheckField ) ) {
+			getModel.fetch( {
+				success: function( getModel ) {
+					deferred.resolve( getModel );
+				},
+				error: function( getModel, response ) {
+					deferred.reject( response );
+				}
+			} );
+		} else {
+
+			// Resolve with the embedded model.
+			deferred.resolve( getModel );
+		}
+
+		// Return a promise.
+		return deferred.promise();
+	};
+
+	/**
+	 * Build a helper to retrieve a collection.
+	 *
+	 * @param  {Backbone.Model} parentModel - The parent model.
+	 * @param  {string} collectionName - The name to use when constructing the collection.
+	 * @param  {string} [embedSourcePoint] - Where to check the embeds object for _embed data.
+	 * @param  {string} [embedIndex] - An additional optional index for the _embed data.
+	 *
+	 * @return {Deferred.promise}        A promise which resolves to the constructed collection.
+	 */
+	wp.api.utils.buildCollectionGetter = function buildCollectionGetter( parentModel, collectionName, embedSourcePoint, embedIndex ) {
+		/**
+		 * Returns a promise that resolves to the requested collection
+		 *
+		 * Uses the embedded data if available, otherwise fetches the
+		 * data from the server.
+		 *
+		 * @return {Deferred.promise} promise Resolves to a wp.api.collections[ collectionName ] collection.
+		 */
+		var postId, embeddeds, getObjects, setHelperParentPost,
+			classProperties = '',
+			properties      = '',
+			deferred        = jQuery.Deferred();
+
+		postId    = parentModel.get( 'id' );
+		embeddeds = parentModel.get( '_embedded' ) || {};
+
+		// Verify that we have a valid post id.
+		if ( ! _.isNumber( postId ) || 0 === postId ) {
+			deferred.reject();
+			return deferred;
+		}
+
+		/**
+		 * Set the model post parent.
+		 */
+		setHelperParentPost = function( collection, postId ) {
+
+			// Attach post_parent id to the collection.
+			_.each( collection.models, function( model ) {
+				model.set( 'parent_post', postId );
+			} );
+		};
+
+		// If we have embedded getObjects data, use that when constructing the getObjects.
+		if ( ! _.isUndefined( embedSourcePoint ) && ! _.isUndefined( embeddeds[ embedSourcePoint ] ) ) {
+
+			// Some embeds also include an index offset, check for that.
+			if ( _.isUndefined( embedIndex ) ) {
+
+				// Use the embed source point directly.
+				properties = embeddeds[ embedSourcePoint ];
+			} else {
+
+				// Add the index to the embed source point.
+				properties = embeddeds[ embedSourcePoint ][ embedIndex ];
+			}
+		} else {
+
+			// Otherwise use the postId.
+			classProperties = { parent: postId };
+		}
+
+		// Create the new getObjects collection.
+		getObjects = new wp.api.collections[ collectionName ]( properties, classProperties );
+
+		// If we didn’t have embedded getObjects, fetch the getObjects data.
+		if ( _.isUndefined( getObjects.models[0] ) ) {
+			getObjects.fetch( {
+				success: function( getObjects ) {
+
+					// Add a helper 'parent_post' attribute onto the model.
+					setHelperParentPost( getObjects, postId );
+					deferred.resolve( getObjects );
+				},
+				error: function( getModel, response ) {
+					deferred.reject( response );
+				}
+			} );
+		} else {
+
+			// Add a helper 'parent_post' attribute onto the model.
+			setHelperParentPost( getObjects, postId );
+			deferred.resolve( getObjects );
+		}
+
+		// Return a promise.
+		return deferred.promise();
+
+	};
+
+	/**
 	 * Add mixins and helpers to models depending on their defaults.
 	 *
-	 * @param {Backbone Model} model          The model to attach helpers and mixins to.
-	 * @param {string}         modelClassName The classname of the constructed model.
+	 * @param {Backbone.Model} model          The model to attach helpers and mixins to.
+	 * @param {string}         modelClassName The class name of the constructed model.
 	 * @param {Object} 	       loadingObjects An object containing the models and collections we are building.
 	 */
 	wp.api.utils.addMixinsAndHelpers = function( model, modelClassName, loadingObjects ) {
@@ -269,7 +416,7 @@
 			 * to or from the server. For example, a date stored as `2015-12-27T21:22:24` on the server
 			 * gets expanded to `Sun Dec 27 2015 14:22:24 GMT-0700 (MST)` when the model is fetched.
 			 *
-			 * @type {{toJSON: toJSON, parse: parse}}.
+			 * @type {{setDate: setDate, getDate: getDate}}.
 			 */
 			TimeStampedMixin = {
 
@@ -283,7 +430,7 @@
 				 * @param {string} field  The date field to set. One of 'date', 'date_gmt', 'date_modified'
 				 *                        or 'date_modified_gmt'. Optional, defaults to 'date'.
 				 */
-				setDate: function( date, field ) {
+				setDate: function setDate( date, field ) {
 					var theField = field || 'date';
 
 					// Don't alter non parsable date fields.
@@ -303,7 +450,7 @@
 				 * @param {string} field  The date field to set. One of 'date', 'date_gmt', 'date_modified'
 				 *                        or 'date_modified_gmt'. Optional, defaults to 'date'.
 				 */
-				getDate: function( field ) {
+				getDate: function getDate( field ) {
 					var theField   = field || 'date',
 						theISODate = this.get( theField );
 
@@ -317,157 +464,11 @@
 			},
 
 			/**
-			 * Build a helper function to retrieve related model.
-			 *
-			 * @param  {string} parentModel      The parent model.
-			 * @param  {int}    modelId          The model ID if the object to request
-			 * @param  {string} modelName        The model name to use when constructing the model.
-			 * @param  {string} embedSourcePoint Where to check the embedds object for _embed data.
-			 * @param  {string} embedCheckField  Which model field to check to see if the model has data.
-			 *
-			 * @return {Deferred.promise}        A promise which resolves to the constructed model.
-			 */
-			buildModelGetter = function( parentModel, modelId, modelName, embedSourcePoint, embedCheckField ) {
-				var getModel, embeddeds, attributes, deferred;
-
-				deferred  = jQuery.Deferred();
-				embeddeds = parentModel.get( '_embedded' ) || {};
-
-				// Verify that we have a valid object id.
-				if ( ! _.isNumber( modelId ) || 0 === modelId ) {
-					deferred.reject();
-					return deferred;
-				}
-
-				// If we have embedded object data, use that when constructing the getModel.
-				if ( embeddeds[ embedSourcePoint ] ) {
-					attributes = _.findWhere( embeddeds[ embedSourcePoint ], { id: modelId } );
-				}
-
-				// Otherwise use the modelId.
-				if ( ! attributes ) {
-					attributes = { id: modelId };
-				}
-
-				// Create the new getModel model.
-				getModel = new wp.api.models[ modelName ]( attributes );
-
-				if ( ! getModel.get( embedCheckField ) ) {
-					getModel.fetch( {
-						success: function( getModel ) {
-							deferred.resolve( getModel );
-						},
-						error: function( getModel, response ) {
-							deferred.reject( response );
-						}
-					} );
-				} else {
-					// Resolve with the embedded model.
-					deferred.resolve( getModel );
-				}
-
-				// Return a promise.
-				return deferred.promise();
-			},
-
-			/**
-			 * Build a helper to retrieve a collection.
-			 *
-			 * @param  {string} parentModel      The parent model.
-			 * @param  {string} collectionName   The name to use when constructing the collection.
-			 * @param  {string} embedSourcePoint Where to check the embedds object for _embed data.
-			 * @param  {string} embedIndex       An addiitonal optional index for the _embed data.
-			 *
-			 * @return {Deferred.promise}        A promise which resolves to the constructed collection.
-			 */
-			buildCollectionGetter = function( parentModel, collectionName, embedSourcePoint, embedIndex ) {
-				/**
-				 * Returns a promise that resolves to the requested collection
-				 *
-				 * Uses the embedded data if available, otherwises fetches the
-				 * data from the server.
-				 *
-				 * @return {Deferred.promise} promise Resolves to a wp.api.collections[ collectionName ]
-				 * collection.
-				 */
-				var postId, embeddeds, getObjects,
-					classProperties = '',
-					properties      = '',
-					deferred        = jQuery.Deferred();
-
-				postId    = parentModel.get( 'id' );
-				embeddeds = parentModel.get( '_embedded' ) || {};
-
-				// Verify that we have a valid post id.
-				if ( ! _.isNumber( postId ) || 0 === postId ) {
-					deferred.reject();
-					return deferred;
-				}
-
-				// If we have embedded getObjects data, use that when constructing the getObjects.
-				if ( ! _.isUndefined( embedSourcePoint ) && ! _.isUndefined( embeddeds[ embedSourcePoint ] ) ) {
-
-					// Some embeds also include an index offset, check for that.
-					if ( _.isUndefined( embedIndex ) ) {
-
-						// Use the embed source point directly.
-						properties = embeddeds[ embedSourcePoint ];
-					} else {
-
-						// Add the index to the embed source point.
-						properties = embeddeds[ embedSourcePoint ][ embedIndex ];
-					}
-				} else {
-
-					// Otherwise use the postId.
-					classProperties = { parent: postId };
-				}
-
-				// Create the new getObjects collection.
-				getObjects = new wp.api.collections[ collectionName ]( properties, classProperties );
-
-				// If we didn’t have embedded getObjects, fetch the getObjects data.
-				if ( _.isUndefined( getObjects.models[0] ) ) {
-					getObjects.fetch( {
-						success: function( getObjects ) {
-
-							// Add a helper 'parent_post' attribute onto the model.
-							setHelperParentPost( getObjects, postId );
-							deferred.resolve( getObjects );
-						},
-						error: function( getModel, response ) {
-							deferred.reject( response );
-						}
-					} );
-				} else {
-
-					// Add a helper 'parent_post' attribute onto the model.
-					setHelperParentPost( getObjects, postId );
-					deferred.resolve( getObjects );
-				}
-
-				// Return a promise.
-				return deferred.promise();
-
-			},
-
-			/**
-			 * Set the model post parent.
-			 */
-			setHelperParentPost = function( collection, postId ) {
-
-				// Attach post_parent id to the collection.
-				_.each( collection.models, function( model ) {
-					model.set( 'parent_post', postId );
-				} );
-			},
-
-			/**
 			 * Add a helper function to handle post Meta.
 			 */
 			MetaMixin = {
 				getMeta: function() {
-					return buildCollectionGetter( this, 'PostMeta', 'https://api.w.org/meta' );
+					return wp.api.utils.buildCollectionGetter( this, 'PostMeta', 'https://api.w.org/meta' );
 				}
 			},
 
@@ -476,7 +477,7 @@
 			 */
 			RevisionsMixin = {
 				getRevisions: function() {
-					return buildCollectionGetter( this, 'PostRevisions' );
+					return wp.api.utils.buildCollectionGetter( this, 'PostRevisions' );
 				}
 			},
 
@@ -654,7 +655,7 @@
 			 */
 			AuthorMixin = {
 				getAuthorUser: function() {
-					return buildModelGetter( this, this.get( 'author' ), 'User', 'author', 'name' );
+					return wp.api.utils.buildModelGetter( this, this.get( 'author' ), 'User', 'author', 'name' );
 				}
 			},
 
@@ -663,7 +664,7 @@
 			 */
 			FeaturedMediaMixin = {
 				getFeaturedMedia: function() {
-					return buildModelGetter( this, this.get( 'featured_media' ), 'Media', 'wp:featuredmedia', 'source_url' );
+					return wp.api.utils.buildModelGetter( this, this.get( 'featured_media' ), 'Media', 'wp:featuredmedia', 'source_url' );
 				}
 			};
 
@@ -941,7 +942,7 @@
 					};
 				}
 
-				// Continue by calling Bacckbone's sync.
+				// Continue by calling Backbone's sync.
 				return Backbone.sync( method, model, options );
 			},
 
@@ -1126,8 +1127,8 @@
 			/**
 			 * Tracking objects for models and collections.
 			 */
-			loadingObjects.models      = routeModel.get( 'models' );
-			loadingObjects.collections = routeModel.get( 'collections' );
+			loadingObjects.models      = {};
+			loadingObjects.collections = {};
 
 			_.each( routeModel.schemaModel.get( 'routes' ), function( route, index ) {
 
@@ -1310,7 +1311,9 @@
 					loadingObjects.collections[ collectionClassName ] = wp.api.WPApiBaseCollection.extend( {
 
 						// For the url of a root level collection, use a string.
-						url: routeModel.get( 'apiRoot' ) + routeModel.get( 'versionString' ) + routeName,
+						url: function() {
+							return routeModel.get( 'apiRoot' ) + routeModel.get( 'versionString' ) + routeName;
+						},
 
 						// Specify the model that this collection contains.
 						model: function( attrs, options ) {
@@ -1337,13 +1340,15 @@
 				loadingObjects.models[ index ] = wp.api.utils.addMixinsAndHelpers( model, index, loadingObjects );
 			} );
 
+			// Set the routeModel models and collections.
+			routeModel.set( 'models', loadingObjects.models );
+			routeModel.set( 'collections', loadingObjects.collections );
+
 		}
 
 	} );
 
-	wp.api.endpoints = new Backbone.Collection( {
-		model: Endpoint
-	} );
+	wp.api.endpoints = new Backbone.Collection();
 
 	/**
 	 * Initialize the wp-api, optionally passing the API root.
@@ -1357,28 +1362,30 @@
 		var endpoint, attributes = {}, deferred, promise;
 
 		args                     = args || {};
-		attributes.apiRoot       = args.apiRoot || wpApiSettings.root;
-		attributes.versionString = args.versionString || wpApiSettings.versionString;
+		attributes.apiRoot       = args.apiRoot || wpApiSettings.root || '/wp-json';
+		attributes.versionString = args.versionString || wpApiSettings.versionString || 'wp/v2/';
 		attributes.schema        = args.schema || null;
 		if ( ! attributes.schema && attributes.apiRoot === wpApiSettings.root && attributes.versionString === wpApiSettings.versionString ) {
 			attributes.schema = wpApiSettings.schema;
 		}
 
 		if ( ! initializedDeferreds[ attributes.apiRoot + attributes.versionString ] ) {
-			endpoint = wp.api.endpoints.findWhere( { apiRoot: attributes.apiRoot, versionString: attributes.versionString } );
+
+			// Look for an existing copy of this endpoint
+			endpoint = wp.api.endpoints.findWhere( { 'apiRoot': attributes.apiRoot, 'versionString': attributes.versionString } );
 			if ( ! endpoint ) {
 				endpoint = new Endpoint( attributes );
-				wp.api.endpoints.add( endpoint );
 			}
 			deferred = jQuery.Deferred();
 			promise = deferred.promise();
 
-			endpoint.schemaConstructed.done( function( endpoint ) {
+			endpoint.schemaConstructed.done( function( resolvedEndpoint ) {
+				wp.api.endpoints.add( resolvedEndpoint );
 
 				// Map the default endpoints, extending any already present items (including Schema model).
-				wp.api.models      = _.extend( endpoint.get( 'models' ), wp.api.models );
-				wp.api.collections = _.extend( endpoint.get( 'collections' ), wp.api.collections );
-				deferred.resolveWith( wp.api, [ endpoint ] );
+				wp.api.models      = _.extend( wp.api.models, resolvedEndpoint.get( 'models' ) );
+				wp.api.collections = _.extend( wp.api.collections, resolvedEndpoint.get( 'collections' ) );
+				deferred.resolve( resolvedEndpoint );
 			} );
 			initializedDeferreds[ attributes.apiRoot + attributes.versionString ] = promise;
 		}
