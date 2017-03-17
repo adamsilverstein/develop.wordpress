@@ -239,7 +239,7 @@
 
 			wp.api.init({
 				'apiRoot': 'http://remotehost/wp-json/'
-			} ).done( function( endpoint ){
+			} ).done( function(){
 				var lastEndpoint = wp.api.endpoints.last(),
 					models = lastEndpoint.get( 'models' ),
 					post = new models.Post();
@@ -248,7 +248,7 @@
 
 				wp.api.init({
 					'apiRoot': 'http://localhost/wp-json/'
-				} ).done( function( endpoint ){
+				} ).done( function(){
 					var lastEndpoint = wp.api.endpoints.first(),
 						models = lastEndpoint.get( 'models' ),
 						post = new models.Post();
