@@ -37,7 +37,9 @@ var pathToData = {
 Backbone.ajax = function ( param ) {
 
 	var data,
-		request = param.url.replace( 'http://localhost/', '' );
+		request = param.url
+			.replace( 'http://remotehost/', '' )
+			.replace( 'http://localhost/', '' );
 
 	if ( pathToData[ request ] ) {
 		data = pathToData[ request ];
