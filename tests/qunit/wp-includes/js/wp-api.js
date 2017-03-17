@@ -246,7 +246,17 @@
 
 				assert.equal( 'http://remotehost/wp-json/wp/v2/posts', post.url(), 'The remote API objects should have their own URLs' );
 
-				done();
+				wp.api.init({
+					'apiRoot': 'http://localhost/wp-json/'
+				} ).done( function( endpoint ){
+					var lastEndpoint = wp.api.endpoints.first(),
+						models = lastEndpoint.get( 'models' ),
+						post = new models.Post();
+
+					assert.equal( 'http://localhost/wp-json/wp/v2/posts', post.url(), 'The local API objects should have their own URLs' );
+
+					done();
+				} );
 			} );
 		} );
 	});
