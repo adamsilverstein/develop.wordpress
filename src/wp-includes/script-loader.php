@@ -735,7 +735,7 @@ function wp_default_scripts( &$scripts ) {
 			'current' => __( 'Current Color' ),
 		) );
 
-		$scripts->add( 'dashboard', "/wp-admin/js/dashboard$suffix.js", array( 'jquery', 'admin-comments', 'postbox', 'wp-api', 'wp-backbone', 'wp-a11y', 'wp-util' ), false, 1 );
+		$scripts->add( 'dashboard', "/wp-admin/js/dashboard$suffix.js", array( 'jquery', 'admin-comments', 'postbox', 'wp-api', 'wp-backbone', 'wp-a11y', 'wp-util', 'wp-hooks' ), false, 1 );
 		did_action( 'init' ) && $scripts->localize( 'dashboard', 'quickDraft', array(
 			'currentUserId'  => get_current_user_id(),
 			'l10n' => array(
