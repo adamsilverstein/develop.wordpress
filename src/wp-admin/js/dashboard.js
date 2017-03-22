@@ -478,13 +478,15 @@ QuickDraft.init = function() {
 		// Fetch up to 4 of the current user's recent drafts by extending wp.api.collections.Posts.
 		var draftsCollection = new wp.api.collections.Posts();
 		draftsCollection.fetch( {
-			data: {
-				status: 'draft',
-				author: quickDraft.currentUserId,
-				per_page: 4,
-				order_by: 'date',
-				'quick-draft-post-list': true /* flag passed for back end filters */
-			}
+			data: wp.hooks.applyFilters(
+				'dashboard_recent_drafts_fetch_args',
+				{
+					status: 'draft',
+					author: quickDraft.currentUserId,
+					per_page: 4,
+					order_by: 'date',
+				}
+			)
 		} );
 
 		// Drafts list is initialized but not rendered until drafts load.
