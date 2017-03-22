@@ -1,4 +1,4 @@
-/* global _, wp, quickDraft, pagenow, ajaxurl, postboxes, wpActiveEditor:true */
+/* global _, wp, quickDraft, pagenow, ajaxurl, postboxes */
 var ajaxWidgets, ajaxPopulateWidgets, QuickDraft = {};
 
 jQuery(document).ready( function($) {
