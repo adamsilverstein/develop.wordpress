@@ -292,9 +292,6 @@ QuickDraft.Views.Form = wp.Backbone.View.extend( {
 				_.bind( function() {
 					this.$el.removeClass( 'is-saving' );
 
-					// Refocus in the title field, hiding its prompt.
-					_.delay( function() { jQuery( '#quick-press input#title' ).focus(); }, 250 );
-
 					// Submission complete
 					quickDraft.state.set( 'submitting', false );
 
