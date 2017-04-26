@@ -10,6 +10,8 @@ mockedApiResponse.Schema = {
     "description": "Just another WordPress site",
     "url": "http://example.org",
     "home": "http://example.org",
+    "gmt_offset": "0",
+    "timezone_string": "",
     "namespaces": [
         "oembed/1.0",
         "wp/v2"
@@ -1987,8 +1989,11 @@ mockedApiResponse.Schema = {
                         },
                         "slug": {
                             "required": false,
-                            "description": "Limit result set to terms with a specific slug.",
-                            "type": "string"
+                            "description": "Limit result set to terms with one or more specific slugs.",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
                         }
                     }
                 },
@@ -2222,8 +2227,11 @@ mockedApiResponse.Schema = {
                         },
                         "slug": {
                             "required": false,
-                            "description": "Limit result set to terms with a specific slug.",
-                            "type": "string"
+                            "description": "Limit result set to terms with one or more specific slugs.",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
                         }
                     }
                 },
@@ -2436,8 +2444,11 @@ mockedApiResponse.Schema = {
                         },
                         "slug": {
                             "required": false,
-                            "description": "Limit result set to users with a specific slug.",
-                            "type": "string"
+                            "description": "Limit result set to users with one or more specific slugs.",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
                         },
                         "roles": {
                             "required": false,

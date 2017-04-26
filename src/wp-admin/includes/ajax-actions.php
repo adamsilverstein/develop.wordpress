@@ -1499,7 +1499,10 @@ function wp_ajax_wp_link_ajax() {
 
 	$args['pagenum'] = ! empty( $_POST['page'] ) ? absint( $_POST['page'] ) : 1;
 
-	require(ABSPATH . WPINC . '/class-wp-editor.php');
+	if ( ! class_exists( '_WP_Editors', false ) ) {
+		require( ABSPATH . WPINC . '/class-wp-editor.php' );
+	}
+
 	$results = _WP_Editors::wp_link_query( $args );
 
 	if ( ! isset( $results ) )
@@ -1600,6 +1603,8 @@ function wp_ajax_sample_permalink() {
  * Ajax handler for Quick Edit saving a post from a list table.
  *
  * @since 3.1.0
+ *
+ * @global string $mode List table view mode.
  */
 function wp_ajax_inline_save() {
 	global $mode;

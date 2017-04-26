@@ -191,7 +191,7 @@ function wp_add_dashboard_widget( $widget_id, $widget_name, $callback, $control_
  * @param array $meta_box
  */
 function _wp_dashboard_control_callback( $dashboard, $meta_box ) {
-	echo '<form method="post" class="dashboard-widget-control-form">';
+	echo '<form method="post" class="dashboard-widget-control-form wp-clearfix">';
 	wp_dashboard_trigger_widget_control( $meta_box['id'] );
 	wp_nonce_field( 'edit-dashboard-widget_' . $meta_box['id'], 'dashboard-widget-nonce' );
 	echo '<input type="hidden" name="widget_id" value="' . esc_attr($meta_box['id']) . '" />';
@@ -968,7 +968,7 @@ function wp_dashboard_rss_output( $widget_id ) {
  * @return bool False on failure. True on success.
  */
 function wp_dashboard_cached_rss_widget( $widget_id, $callback, $check_urls = array() ) {
-	$loading = '<p class="widget-loading hide-if-no-js">' . __( 'Loading&#8230;' ) . '</p><p class="hide-if-js">' . __( 'This widget requires JavaScript.' ) . '</p>';
+	$loading = '<p class="widget-loading hide-if-no-js">' . __( 'Loading&#8230;' ) . '</p><div class="hide-if-js notice notice-error inline"><p>' . __( 'This widget requires JavaScript.' ) . '</p></div>';
 	$doing_ajax = wp_doing_ajax();
 
 	if ( empty($check_urls) ) {
@@ -1152,7 +1152,7 @@ function wp_dashboard_primary() {
 		)
 	);
 
-	if ( ( ! defined( 'DISALLOW_FILE_MODS' ) || ! DISALLOW_FILE_MODS ) && ( ! is_multisite() && is_blog_admin() && current_user_can( 'install_plugins' ) ) || ( is_network_admin() && current_user_can( 'manage_network_plugins' ) && current_user_can( 'install_plugins' ) ) ) {
+	if ( ( ! wp_disallow_file_mods( 'dashboard_widget' ) ) && ( ! is_multisite() && is_blog_admin() && current_user_can( 'install_plugins' ) ) || ( is_network_admin() && current_user_can( 'manage_network_plugins' ) && current_user_can( 'install_plugins' ) ) ) {
 		$feeds['plugins'] = array(
 			'link'         => '',
 			'url'          => array(

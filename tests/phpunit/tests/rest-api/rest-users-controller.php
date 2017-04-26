@@ -574,6 +574,68 @@ class WP_Test_REST_Users_Controller extends WP_Test_REST_Controller_Testcase {
 		$this->assertEquals( $id2, $data[0]['id'] );
 	}
 
+	public function test_get_items_slug_array_query() {
+		wp_set_current_user( self::$user );
+		$id1 = $this->factory->user->create( array(
+			'display_name' => 'Taco',
+			'user_login'   => 'taco'
+		) );
+		$id2 = $this->factory->user->create( array(
+			'display_name' => 'Enchilada',
+			'user_login'   => 'enchilada'
+		) );
+		$id3 = $this->factory->user->create( array(
+			'display_name' => 'Burrito',
+			'user_login'   => 'burrito'
+		) );
+		$this->factory->user->create( array(
+			'display_name' => 'Hon Pizza',
+			'user_login'   => 'pizza'
+		) );
+		$request = new WP_REST_Request( 'GET', '/wp/v2/users' );
+		$request->set_param( 'slug', array(
+			'taco',
+			'burrito',
+			'enchilada',
+		) );
+		$request->set_param( 'orderby', 'slug' );
+		$request->set_param( 'order', 'asc' );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$slugs = wp_list_pluck( $data, 'slug' );
+		$this->assertEquals( array( 'burrito', 'enchilada', 'taco' ), $slugs );
+	}
+
+	public function test_get_items_slug_csv_query() {
+		wp_set_current_user( self::$user );
+		$id1 = $this->factory->user->create( array(
+			'display_name' => 'Taco',
+			'user_login'   => 'taco'
+		) );
+		$id2 = $this->factory->user->create( array(
+			'display_name' => 'Enchilada',
+			'user_login'   => 'enchilada'
+		) );
+		$id3 = $this->factory->user->create( array(
+			'display_name' => 'Burrito',
+			'user_login'   => 'burrito'
+		) );
+		$this->factory->user->create( array(
+			'display_name' => 'Hon Pizza',
+			'user_login'   => 'pizza'
+		) );
+		$request = new WP_REST_Request( 'GET', '/wp/v2/users' );
+		$request->set_param( 'slug', 'taco,burrito , enchilada');
+		$request->set_param( 'orderby', 'slug' );
+		$request->set_param( 'order', 'desc' );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+		$slugs = wp_list_pluck( $data, 'slug' );
+		$this->assertEquals( array( 'taco', 'enchilada', 'burrito' ), $slugs );
+	}
+
 	// Note: Do not test using editor role as there is an editor role created in testing and it makes it hard to test this functionality.
 	public function test_get_items_roles() {
 		wp_set_current_user( self::$user );
@@ -930,10 +992,11 @@ class WP_Test_REST_Users_Controller extends WP_Test_REST_Controller_Testcase {
 		$this->assertEquals( 'Sorry, that username is not allowed.', $errors['username'] );
 	}
 
+	/**
+	 * @group ms-required
+	 */
 	public function test_create_new_network_user_on_site_does_not_add_user_to_sub_site() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Test requires multisite.' );
-		}
+		$this->skipWithoutMultisite();
 
 		$this->allow_user_to_manage_multisite();
 
@@ -959,10 +1022,11 @@ class WP_Test_REST_Users_Controller extends WP_Test_REST_Controller_Testcase {
 		$this->assertFalse( $user_is_member );
 	}
 
+	/**
+	 * @group ms-required
+	 */
 	public function test_create_new_network_user_on_sub_site_adds_user_to_site() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Test requires multisite.' );
-		}
+		$this->skipWithoutMultisite();
 
 		$this->allow_user_to_manage_multisite();
 
@@ -992,10 +1056,11 @@ class WP_Test_REST_Users_Controller extends WP_Test_REST_Controller_Testcase {
 		$this->assertTrue( $user_is_member );
 	}
 
+	/**
+	 * @group ms-required
+	 */
 	public function test_create_existing_network_user_on_sub_site_has_error() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Test requires multisite.' );
-		}
+		$this->skipWithoutMultisite();
 
 		$this->allow_user_to_manage_multisite();
 
@@ -1379,10 +1444,11 @@ class WP_Test_REST_Users_Controller extends WP_Test_REST_Controller_Testcase {
 		$this->assertArrayNotHasKey( 'administrator', $user->caps );
 	}
 
+	/**
+	 * @group ms-excluded
+	 */
 	public function test_update_user_role_invalid_privilege_deescalation() {
-		if ( is_multisite() ) {
-			return $this->markTestSkipped( 'Test only intended for single site.' );
-		}
+		$this->skipWithMultisite();
 
 		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 
@@ -1409,10 +1475,11 @@ class WP_Test_REST_Users_Controller extends WP_Test_REST_Controller_Testcase {
 		$this->assertArrayNotHasKey( 'editor', $user->caps );
 	}
 
+	/**
+	 * @group ms-required
+	 */
 	public function test_update_user_role_privilege_deescalation_multisite() {
-		if ( ! is_multisite() ) {
-			return $this->markTestSkipped( 'Test only intended for multisite.' );
-		}
+		$this->skipWithoutMultisite();
 
 		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 
@@ -2158,11 +2225,10 @@ class WP_Test_REST_Users_Controller extends WP_Test_REST_Controller_Testcase {
 
 	/**
 	 * @ticket 39701
+	 * @group ms-required
 	 */
 	public function test_get_item_from_different_site_as_site_administrator() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Test only runs in multisite' );
-		}
+		$this->skipWithoutMultisite();
 
 		switch_to_blog( self::$site );
 		$user_id = $this->factory->user->create( array(
@@ -2179,11 +2245,10 @@ class WP_Test_REST_Users_Controller extends WP_Test_REST_Controller_Testcase {
 
 	/**
 	 * @ticket 39701
+	 * @group ms-required
 	 */
 	public function test_get_item_from_different_site_as_network_administrator() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Test only runs in multisite' );
-		}
+		$this->skipWithoutMultisite();
 
 		switch_to_blog( self::$site );
 		$user_id = $this->factory->user->create( array(
@@ -2200,11 +2265,10 @@ class WP_Test_REST_Users_Controller extends WP_Test_REST_Controller_Testcase {
 
 	/**
 	 * @ticket 39701
+	 * @group ms-required
 	 */
 	public function test_update_item_from_different_site_as_site_administrator() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Test only runs in multisite' );
-		}
+		$this->skipWithoutMultisite();
 
 		switch_to_blog( self::$site );
 		$user_id = $this->factory->user->create( array(
@@ -2223,11 +2287,10 @@ class WP_Test_REST_Users_Controller extends WP_Test_REST_Controller_Testcase {
 
 	/**
 	 * @ticket 39701
+	 * @group ms-required
 	 */
 	public function test_update_item_from_different_site_as_network_administrator() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Test only runs in multisite' );
-		}
+		$this->skipWithoutMultisite();
 
 		switch_to_blog( self::$site );
 		$user_id = $this->factory->user->create( array(
@@ -2246,11 +2309,10 @@ class WP_Test_REST_Users_Controller extends WP_Test_REST_Controller_Testcase {
 
 	/**
 	 * @ticket 39701
+	 * @group ms-required
 	 */
 	public function test_delete_item_from_different_site_as_site_administrator() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Test only runs in multisite' );
-		}
+		$this->skipWithoutMultisite();
 
 		switch_to_blog( self::$site );
 		$user_id = $this->factory->user->create( array(
@@ -2269,11 +2331,10 @@ class WP_Test_REST_Users_Controller extends WP_Test_REST_Controller_Testcase {
 
 	/**
 	 * @ticket 39701
+	 * @group ms-required
 	 */
 	public function test_delete_item_from_different_site_as_network_administrator() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Test only runs in multisite' );
-		}
+		$this->skipWithoutMultisite();
 
 		switch_to_blog( self::$site );
 		$user_id = $this->factory->user->create( array(

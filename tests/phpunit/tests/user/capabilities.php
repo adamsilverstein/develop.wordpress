@@ -226,7 +226,9 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 			'manage_network_themes'  => array(),
 			'manage_network_options' => array(),
 			'delete_site'            => array(),
+			'upgrade_network'        => array(),
 
+			'setup_network'          => array( 'administrator' ),
 			'upload_plugins'         => array( 'administrator' ),
 			'upload_themes'          => array( 'administrator' ),
 			'customize'              => array( 'administrator' ),
@@ -254,9 +256,11 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 			'manage_network_plugins' => array(),
 			'manage_network_themes'  => array(),
 			'manage_network_options' => array(),
+			'setup_network'          => array(),
 			'upload_plugins'         => array(),
 			'upload_themes'          => array(),
 			'edit_css'               => array(),
+			'upgrade_network'        => array(),
 
 			'customize'              => array( 'administrator' ),
 			'delete_site'            => array( 'administrator' ),
@@ -607,11 +611,12 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 		return $data;
 	}
 
+	/**
+	 * @group ms-required
+	 */
 	function test_super_admin_caps() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Test only runs in multisite' );
-			return;
-		}
+		$this->skipWithoutMultisite();
+
 		$caps = $this->getAllCapsAndRoles();
 		$user = self::$super_admin;
 
@@ -1351,11 +1356,11 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 		wp_set_current_user( $old_uid );
 	}
 
+	/**
+	 * @group ms-required
+	 */
 	function test_borked_current_user_can_for_blog() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Test only runs in multisite' );
-			return;
-		}
+		$this->skipWithoutMultisite();
 
 		$orig_blog_id = get_current_blog_id();
 		$blog_id = self::factory()->blog->create();
@@ -1412,11 +1417,11 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 		$this->assertFalse( current_user_can( 'edit_post', $post + 1 ) );
 	}
 
+	/**
+	 * @group ms-required
+	 */
 	function test_multisite_administrator_can_not_edit_users() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Test only runs in multisite' );
-			return;
-		}
+		$this->skipWithoutMultisite();
 
 		$user = self::$users['administrator'];
 		$other_user = self::$users['subscriber'];
@@ -1446,10 +1451,11 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 		$this->assertFalse( user_can( self::$users['subscriber']->ID,   'remove_user', self::$users['subscriber']->ID ) );
 	}
 
+	/**
+	 * @group ms-required
+	 */
 	public function test_only_super_admins_can_delete_users_on_multisite() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Test only runs on multisite' );
-		}
+		$this->skipWithoutMultisite();
 
 		$this->assertTrue( user_can( self::$super_admin->ID,             'delete_user', self::$users['subscriber']->ID ) );
 
@@ -1460,10 +1466,11 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 		$this->assertFalse( user_can( self::$users['subscriber']->ID,    'delete_user', self::$users['subscriber']->ID ) );
 	}
 
+	/**
+	 * @group ms-excluded
+	 */
 	public function test_only_admins_can_delete_users_on_single_site() {
-		if ( is_multisite() ) {
-			$this->markTestSkipped( 'Test does not run on multisite' );
-		}
+		$this->skipWithMultisite();
 
 		$this->assertTrue( user_can( self::$users['administrator']->ID, 'delete_user', self::$users['subscriber']->ID ) );
 
@@ -1518,11 +1525,11 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 
 	}
 
+	/**
+	 * @group ms-required
+	 */
 	function test_multisite_administrator_with_manage_network_users_can_edit_users() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Test only runs in multisite' );
-			return;
-		}
+		$this->skipWithoutMultisite();
 
 		$user = self::$users['administrator'];
 		$user->add_cap( 'manage_network_users' );
@@ -1537,11 +1544,11 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 		$this->assertTrue( $can_edit_user );
 	}
 
+	/**
+	 * @group ms-required
+	 */
 	function test_multisite_administrator_with_manage_network_users_can_not_edit_super_admin() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Test only runs in multisite' );
-			return;
-		}
+		$this->skipWithoutMultisite();
 
 		$user = self::$users['administrator'];
 		$user->add_cap( 'manage_network_users' );
@@ -1760,11 +1767,10 @@ class Tests_User_Capabilities extends WP_UnitTestCase {
 
 	/**
 	 * @ticket 39063
+	 * @group ms-required
 	 */
 	public function test_only_super_admins_can_remove_themselves_on_multisite() {
-		if ( ! is_multisite() ) {
-			$this->markTestSkipped( 'Test only runs in multisite.' );
-		}
+		$this->skipWithoutMultisite();
 
 		$this->assertTrue( user_can( self::$super_admin->ID, 'remove_user', self::$super_admin->ID ) );
 

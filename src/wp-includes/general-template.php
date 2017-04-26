@@ -1860,7 +1860,7 @@ function wp_get_archives( $args = '' ) {
  * @since 1.5.0
  *
  * @param int $num Number of day.
- * @return int Days since the start of the week.
+ * @return float Days since the start of the week.
  */
 function calendar_week_mod($num) {
 	$base = 7;
@@ -3054,6 +3054,23 @@ function wp_editor( $content, $editor_id, $settings = array() ) {
 	if ( ! class_exists( '_WP_Editors', false ) )
 		require( ABSPATH . WPINC . '/class-wp-editor.php' );
 	_WP_Editors::editor($content, $editor_id, $settings);
+}
+
+/**
+ * Outputs the editor scripts, stylesheets, and default settings.
+ *
+ * The editor can be initialized when needed after page load.
+ * See wp.editor.initialize() in wp-admin/js/editor.js for initialization options.
+ *
+ * @uses _WP_Editors
+ * @since 4.8.0
+ */
+function wp_enqueue_editor() {
+	if ( ! class_exists( '_WP_Editors', false ) ) {
+		require( ABSPATH . WPINC . '/class-wp-editor.php' );
+	}
+
+	_WP_Editors::enqueue_default_editor();
 }
 
 /**

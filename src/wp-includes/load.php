@@ -515,7 +515,7 @@ function wp_start_object_cache() {
 	}
 
 	if ( function_exists( 'wp_cache_add_global_groups' ) ) {
-		wp_cache_add_global_groups( array( 'users', 'userlogins', 'usermeta', 'user_meta', 'useremail', 'userslugs', 'site-transient', 'site-options', 'site-lookup', 'blog-lookup', 'blog-details', 'site-details', 'rss', 'global-posts', 'blog-id-cache', 'networks', 'sites' ) );
+		wp_cache_add_global_groups( array( 'users', 'userlogins', 'usermeta', 'user_meta', 'useremail', 'userslugs', 'site-transient', 'site-options', 'blog-lookup', 'blog-details', 'site-details', 'rss', 'global-posts', 'blog-id-cache', 'networks', 'sites' ) );
 		wp_cache_add_non_persistent_groups( array( 'counts', 'plugins' ) );
 	}
 }
@@ -1071,4 +1071,24 @@ function wp_doing_ajax() {
  */
 function is_wp_error( $thing ) {
 	return ( $thing instanceof WP_Error );
+}
+
+/**
+ * Determines whether file modifications are disallowed.
+ *
+ * @since 4.8.0
+ *
+ * @param string $context The usage context.
+ * @return bool True if file modification is disallowed, false otherwise.
+ */
+function wp_disallow_file_mods( $context ) {
+	/**
+	 * Filters whether file modifications are disallowed.
+	 *
+	 * @since 4.8.0
+	 *
+	 * @param bool   $disllow_file_mods Whether file modifications are disallowed.
+	 * @param string $context           The usage context.
+	 */
+	return apply_filters( 'disallow_file_mods' , defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS, $context );
 }

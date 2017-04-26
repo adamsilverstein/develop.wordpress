@@ -163,6 +163,15 @@ body {
 #customize-controls .customize-info .customize-panel-description.open + .no-widget-areas-rendered-notice {
 	border-top: none;
 }
+.no-widget-areas-rendered-notice {
+	font-style: italic;
+}
+.no-widget-areas-rendered-notice p:first-child {
+	margin-top: 0;
+}
+.no-widget-areas-rendered-notice p:last-child {
+	margin-bottom: 0;
+}
 
 #customize-controls .customize-info .customize-section-description {
 	margin-bottom: 15px;
@@ -292,6 +301,11 @@ body {
 	transition: 0.18s transform cubic-bezier(0.645, 0.045, 0.355, 1);
 	-webkit-transition: 0.18s transform cubic-bezier(0.645, 0.045, 0.355, 1), 0.18s -webkit-transform cubic-bezier(0.645, 0.045, 0.355, 1);
 	transition: 0.18s transform cubic-bezier(0.645, 0.045, 0.355, 1), 0.18s -webkit-transform cubic-bezier(0.645, 0.045, 0.355, 1); /* easeInOutCubic */
+}
+
+#customize-theme-controls .customize-pane-child.skip-transition {
+	-webkit-transition: none;
+	transition: none;
 }
 
 #customize-info,
@@ -1175,20 +1189,18 @@ p.customize-section-description {
 .customize-section-description-container + #customize-control-custom_css:last-child {
 	margin-left: -12px;
 	width: 299px;
+	width: -webkit-calc( 100% + 24px );
+	width: calc( 100% + 24px );
 	margin-bottom: -12px;
 }
 
 @media screen and ( max-width: 640px ) {
 	.customize-section-description-container + #customize-control-custom_css:last-child {
-		margin-left: 0;
 		margin-right: 0;
-		width: 100%;
 	}
 	.customize-section-description-container + #customize-control-custom_css:last-child textarea {
 		height: -webkit-calc( 100vh - 140px );
 		height: calc( 100vh - 140px );
-		width: 100%;
-		border: solid 1px #ddd;
 	}
 }
 
