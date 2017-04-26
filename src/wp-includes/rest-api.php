@@ -638,6 +638,10 @@ function rest_filter_response_fields( $response, $server, $request ) {
 
 	$fields = (array) explode( ',', $request['_fields'] );
 
+	if ( 0 === count( $fields ) ) {
+		return $response;
+	}
+
 	// Trim off outside whitespace from the comma delimited list.
 	$fields = array_map( 'trim', $fields );
 
