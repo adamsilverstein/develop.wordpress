@@ -547,6 +547,16 @@ function wp_default_scripts( &$scripts ) {
 			'termSelected' => __( 'Term selected.' ),
 			'termAdded'    => __( 'Term added.' ),
 			'termRemoved'  => __( 'Term removed.' ),
+			'restURL'      => rest_url( '/wp/v2/tags' ),
+
+			/**
+			 * Filters the minimum number of characters required to fire a tag search via Ajax.
+			 *
+			 * @since 4.0.0
+			 *
+			 * @param int         $characters The minimum number of characters required. Default 2.
+			 */
+			'minChars'     => (int) apply_filters( 'term_search_min_chars', 2 ),
 		) );
 
 		$scripts->add( 'post', "/wp-admin/js/post$suffix.js", array( 'suggest', 'wp-lists', 'postbox', 'tags-box', 'underscore', 'word-count', 'wp-a11y' ), false, 1 );
