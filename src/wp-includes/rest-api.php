@@ -170,6 +170,7 @@ function rest_api_default_filters() {
 	// Default serving.
 	add_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
 	add_filter( 'rest_post_dispatch', 'rest_send_allow_header', 10, 3 );
+	add_filter( 'rest_post_dispatch', 'rest_filter_response_fields', 10, 3 );
 
 	add_filter( 'rest_pre_dispatch', 'rest_handle_options_request', 10, 3 );
 }
@@ -613,6 +614,44 @@ function rest_send_allow_header( $response, $server, $request ) {
 	if ( $allowed_methods ) {
 		$response->header( 'Allow', implode( ', ', array_map( 'strtoupper', array_keys( $allowed_methods ) ) ) );
 	}
+
+	return $response;
+}
+
+/**
+ * Filter the API response to include only a whitelisted set of response object fields.
+ *
+ * @since 4.7.0
+ *
+ * @param WP_REST_Response $response Current response being served.
+ * @param WP_REST_Server   $server   ResponseHandler instance (usually WP_REST_Server).
+ * @param WP_REST_Request  $request  The request that was used to make current response.
+ * @return WP_REST_Response Response to be served, trimmed down to contain a subset of fields.
+ */
+function rest_filter_response_fields( $response, $server, $request ) {
+	if ( ! isset( $request['_fields'] ) || $response->is_error() ) {
+		return $response;
+	}
+
+	$data = $response->get_data();
+
+	$fields = (array) explode( ',', $request['_fields'] );
+
+	$fields_as_keyed = array_combine( $fields, array_fill( 0, count( $fields ), true ) );
+
+	if ( wp_is_numeric_array( $data ) ) {
+		// $new_data = array_map( function ( $item ) use ( $fields_as_keyed ) {
+		// 	return array_intersect_key( $item, $fields_as_keyed );
+		// }, $data );
+		$new_data = array();
+		foreach ( $data as $item ) {
+			$new_data[] = array_intersect_key( $item, $fields_as_keyed );
+		}
+	} else {
+		$new_data = array_intersect_key( $data, $fields_as_keyed );
+	}
+
+	$response->set_data( $new_data );
 
 	return $response;
 }
