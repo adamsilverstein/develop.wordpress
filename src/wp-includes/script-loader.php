@@ -552,6 +552,8 @@ function wp_default_scripts( &$scripts ) {
 			/**
 			 * Filters the minimum number of characters required to fire a tag search via Ajax.
 			 *
+			 * Previous to 4.8.0, this filter passed taxonomy and search context parameters.
+
 			 * @since 4.0.0
 			 *
 			 * @param int         $characters The minimum number of characters required. Default 2.
