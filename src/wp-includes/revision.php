@@ -442,14 +442,14 @@ function wp_get_post_revisions( $post_id = 0, $args = null ) {
 	if ( ! $post || empty( $post->ID ) )
 		return array();
 
-	$defaults = array( 'order' => 'DESC', 'orderby' => 'date ID', 'check_enabled' => true );
+	$defaults = array( 'order' => 'DESC', 'orderby' => 'date ID', 'check_enabled' => true, 'posts_per_page' => -1 );
 	$args = wp_parse_args( $args, $defaults );
 
 	if ( $args['check_enabled'] && ! wp_revisions_enabled( $post ) )
 		return array();
 
 	$args = array_merge( $args, array( 'post_parent' => $post->ID, 'post_type' => 'revision', 'post_status' => 'inherit' ) );
-
+error_log(json_encode($args, JSON_PRETTY_PRINT));
 	if ( ! $revisions = get_children( $args ) )
 		return array();
 

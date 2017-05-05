@@ -789,7 +789,10 @@ function post_author_meta_box($post) {
  * @param object $post
  */
 function post_revisions_meta_box( $post ) {
-	wp_list_post_revisions( $post );
+	wp_list_post_revisions( $post, 'all', 10 );
+	?>
+		<button type="button" class="load-more-revisions button hide-if-no-js" aria-label="Load more revisions">Load More</button>
+	<?php
 }
 
 // -- Page related Meta Boxes

@@ -284,6 +284,24 @@ window.wp = window.wp || {};
 }(jQuery));
 
 /**
+ * Load more revisions.
+ */
+( function( $ ) {
+
+	$( document ).on( 'ready', function() {
+		var $loadMoreButton = $( '.load-more-revisions' );
+		$loadMoreButton.one( 'click', function() {
+			var revisions = new wp.api.collections.PostRevisions( {}, { 'parent': $('#post_ID').val() });
+
+			revisions.fetch( data: { per_page: 10, page: 1 } } );
+
+		} );
+		$loadMoreButton.click();
+	} );
+
+}( jQuery ) );
+
+/**
  * All post and postbox controls and functionality.
  */
 jQuery(document).ready( function($) {

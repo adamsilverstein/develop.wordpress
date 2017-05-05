@@ -793,7 +793,6 @@ function post_password_required( $post = null ) {
 		return apply_filters( 'post_password_required', true, $post );
 	}
 
-	require_once ABSPATH . WPINC . '/class-phpass.php';
 	$hasher = new PasswordHash( 8, true );
 
 	$hash = wp_unslash( $_COOKIE[ 'wp-postpass_' . COOKIEHASH ] );
@@ -1784,8 +1783,9 @@ function wp_post_revision_title_expanded( $revision, $link = true ) {
  *
  * @param int|WP_Post $post_id Optional. Post ID or WP_Post object. Default is global $post.
  * @param string      $type    'all' (default), 'revision' or 'autosave'
+ * @param int         $limit   The number of revisions to display. Default is no limit (-1).
  */
-function wp_list_post_revisions( $post_id = 0, $type = 'all' ) {
+function wp_list_post_revisions( $post_id = 0, $type = 'all', $limit=-1 ) {
 	if ( ! $post = get_post( $post_id ) )
 		return;
 
@@ -1795,7 +1795,7 @@ function wp_list_post_revisions( $post_id = 0, $type = 'all' ) {
 		_deprecated_argument( __FUNCTION__, '3.6.0' );
 	}
 
-	if ( ! $revisions = wp_get_post_revisions( $post->ID ) )
+	if ( ! $revisions = wp_get_post_revisions( $post->ID, array( 'posts_per_page' => $limit ) ) )
 		return;
 
 	$rows = '';

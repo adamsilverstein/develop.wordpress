@@ -549,7 +549,7 @@ function wp_default_scripts( &$scripts ) {
 			'termRemoved'  => __( 'Term removed.' ),
 		) );
 
-		$scripts->add( 'post', "/wp-admin/js/post$suffix.js", array( 'suggest', 'wp-lists', 'postbox', 'tags-box', 'underscore', 'word-count', 'wp-a11y' ), false, 1 );
+		$scripts->add( 'post', "/wp-admin/js/post$suffix.js", array( 'suggest', 'wp-lists', 'postbox', 'tags-box', 'underscore', 'word-count', 'wp-a11y', 'wp-api' ), false, 1 );
 		did_action( 'init' ) && $scripts->localize( 'post', 'postL10n', array(
 			'ok' => __('OK'),
 			'cancel' => __('Cancel'),
