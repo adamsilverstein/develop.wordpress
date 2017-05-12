@@ -1391,6 +1391,9 @@
 		return initializedDeferreds[ attributes.apiRoot + attributes.versionString ];
 	};
 
+	wp.api.defaultApiRoot       = '/wp-json';
+	wp.api.defaultVersionString = 'wp/v2/';
+
 	/**
 	 * Construct the default endpoints and add to an endpoints collection.
 	 */
