@@ -1179,10 +1179,11 @@
 
 						// Return a constructed url based on the parent and id.
 						url: function() {
+							var hasParent = ! _.isEmpty( parentName );
 							var url =
 								routeModel.get( 'apiRoot' ) +
 								routeModel.get( 'versionString' ) +
-								parentName +  '/' +
+								( hasParent ? ( parentName + '/' ) : '' ) +
 									( ( _.isUndefined( this.get( 'parent' ) ) || 0 === this.get( 'parent' ) ) ?
 										( _.isUndefined( this.get( 'parent_post' ) ) ? '' : this.get( 'parent_post' ) + '/' ) :
 										this.get( 'parent' ) + '/' ) +
