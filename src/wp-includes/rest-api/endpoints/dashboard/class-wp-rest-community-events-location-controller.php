@@ -58,7 +58,6 @@ class WP_REST_Community_Events_Location_Controller extends WP_REST_Controller {
 	 * @return WP_Error|true True if the request has read access, WP_Error object otherwise.
 	 */
 	public function get_current_item_permissions_check( $request ) {
-		return true;
 		if ( ! is_user_logged_in() ) {
 			return new WP_Error( 'rest_not_logged_in', __( 'You are not currently logged in.' ), array( 'status' => 401 ) );
 		}
