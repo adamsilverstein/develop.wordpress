@@ -316,10 +316,11 @@ jQuery( function( $ ) {
 					'success': function( model, response ) {
 						window.console.log( 'success', response );
 						var events   = response._embedded && response._embedded.events ? response._embedded.events[0] : [];
-						var location = response.description;
+						var location = response;
 
 						delete response._embedded;
 						delete response._links;
+
 						app.renderEventsTemplate({
 							location: location,
 							events: events
