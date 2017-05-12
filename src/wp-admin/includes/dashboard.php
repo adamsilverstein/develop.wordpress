@@ -144,8 +144,6 @@ function wp_get_community_events_script_data() {
 	$events_client = new WP_Community_Events( $user_id, $user_location );
 
 	$script_data = array(
-		'rest_url' => rest_url( '/' ),
-		'rest_nonce' => wp_create_nonce( 'wp_rest' ),
 		'cache' => $events_client->get_cached_events(),
 
 		'l10n' => array(
