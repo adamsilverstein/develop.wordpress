@@ -1287,9 +1287,13 @@ console.log( remainder );
 
 						// Function that returns a constructed url passed on the parent.
 						url: function() {
-							return routeModel.get( 'apiRoot' ) + routeModel.get( 'versionString' ) +
-									parentName + '/' + this.parent + '/' +
-									routeName;
+							var hasParent = ! _.isEmpty( this.parent );
+
+							return routeModel.get( 'apiRoot' ) +
+								routeModel.get( 'versionString' ) +
+								( hasParent ? ( parentName + '/' ) : remainder ) +
+								( hasParent ? ( this.parent + '/' ) : '' ) +
+								routeName;
 						},
 
 						// Specify the model that this collection contains.
