@@ -288,7 +288,8 @@ jQuery( function( $ ) {
 		getEvents: function( requestParams ) {
 			var initiatedBy,
 			    app = this,
-			    $spinner = $( '.community-events-form' ).children( '.spinner' );
+			    $spinner = $( '.community-events-form' ).children( '.spinner' ),
+			    dashboardLoadPromise = wp.api.init( { 'versionString': 'wp/dashboard/v1/' } );
 
 			requestParams          = requestParams || {};
 			requestParams.timezone = window.Intl ? window.Intl.DateTimeFormat().resolvedOptions().timeZone : '';
@@ -298,45 +299,58 @@ jQuery( function( $ ) {
 
 			$spinner.addClass( 'is-active' );
 
-			$.ajax( communityEventsData.rest_url + 'wp/dashboard/v1/community-events/location/me', {
-				method: 'GET',
-				data: requestParams,
-				dataType: 'json',
-				headers: {
-					'X-WP-Nonce': communityEventsData.rest_nonce
-				},
-				success: function( response ) {
-					var events   = response._embedded && response._embedded.events ? response._embedded.events[0] : [];
-					var location = response;
+			dashboardLoadPromise.done( function( endpoint ) {
+				if ( ! app.model ) {
+					app.model = new wp.api.collections.CommunityEventsMine();
+				}
+				requestParams          = requestParams || {};
+				requestParams.timezone = window.Intl ? window.Intl.DateTimeFormat().resolvedOptions().timeZone : '';
+				requestParams._embed   = 1;
+				initiatedBy = requestParams.location ? 'user' : 'app';
 
-					delete location._embedded;
-					delete location._links;
+				$spinner.addClass( 'is-active' );
 
-					app.renderEventsTemplate({
-						location: location,
-						events: events
-					}, initiatedBy );
-				},
-				error: function( xhr ) {
-					if ( xhr.responseJSON && 'rest_cannot_retrieve_user_location' === xhr.responseJSON.code && requestParams.location ) {
+
+				var meModel = app.model.fetch( {
+					'data': requestParams,
+					'success': function( model, response ) {
+						window.console.log( 'success', response );
+						var events   = response._embedded && response._embedded.events ? response._embedded.events[0] : [];
+						var location = response.description;
+
+						delete response._embedded;
+						delete response._links;
 						app.renderEventsTemplate({
-							unknownCity: requestParams.location,
-							location: false,
-							events: []
+							location: location,
+							events: events
 						}, initiatedBy );
 
-						return;
-					}
+					},
+					'error': function( model, response ) {
 
-					app.renderEventsTemplate( {
-						'location' : false,
-						'error'    : true
-					}, initiatedBy );
-				},
-				complete: function() {
-					$spinner.removeClass( 'is-active' );
-				}
+						if ( 'rest_cannot_retrieve_user_location' === response.code && requestParams.location ) {
+							app.renderEventsTemplate({
+								unknownCity: requestParams.location,
+								location: false,
+								events: []
+							}, initiatedBy );
+
+							return;
+						}
+
+						app.renderEventsTemplate( {
+							'location' : false,
+							'error'    : true
+						}, initiatedBy );
+					}
+				} );
+
+				meModel
+					.always( function() {
+						$spinner.removeClass( 'is-active' );
+					});
 			});
+
 		},
 
 		/**
