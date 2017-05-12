@@ -1282,14 +1282,20 @@
 
 						// Function that returns a constructed url passed on the parent.
 						url: function() {
+							var hasParent = ! _.isEmpty( this.parent );
 							return routeModel.get( 'apiRoot' ) + routeModel.get( 'versionString' ) +
-									parentName + '/' + this.parent + '/' +
+									parentName + '/' +
+									( hasParent ? ( this.parent + '/' ) : '' ) +
 									routeName;
 						},
 
 						// Specify the model that this collection contains.
 						model: function( attrs, options ) {
-							return new loadingObjects.models[ modelClassName ]( attrs, options );
+							if ( loadingObjects.models[ modelClassName ] ) {
+								return new loadingObjects.models[ modelClassName ]( attrs, options );
+							} else {
+								return new Backbone.Model();
+							}
 						},
 
 						// Include a reference to the original class name.
