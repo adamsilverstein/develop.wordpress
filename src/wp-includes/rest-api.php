@@ -237,6 +237,14 @@ function create_initial_rest_routes() {
 	// Settings.
 	$controller = new WP_REST_Settings_Controller;
 	$controller->register_routes();
+
+	// Community events.
+	$controller = new WP_REST_Community_Events_Events_Controller;
+	$controller->register_routes();
+
+	// Community events location.
+	$controller = new WP_REST_Community_Events_Location_Controller;
+	$controller->register_routes();
 }
 
 /**

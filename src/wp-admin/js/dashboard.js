@@ -191,7 +191,7 @@ jQuery(document).ready( function($) {
 
 jQuery( function( $ ) {
 	'use strict';
-	
+
 	var communityEventsData = window.communityEventsData || {};
 
 	var app = window.wp.communityEvents = {
@@ -291,42 +291,52 @@ jQuery( function( $ ) {
 			    $spinner = $( '.community-events-form' ).children( '.spinner' );
 
 			requestParams          = requestParams || {};
-			requestParams._wpnonce = communityEventsData.nonce;
 			requestParams.timezone = window.Intl ? window.Intl.DateTimeFormat().resolvedOptions().timeZone : '';
+			requestParams._embed   = 1;
 
 			initiatedBy = requestParams.location ? 'user' : 'app';
 
 			$spinner.addClass( 'is-active' );
 
-			wp.ajax.post( 'get-community-events', requestParams )
-				.always( function() {
-					$spinner.removeClass( 'is-active' );
-				})
+			$.ajax( communityEventsData.rest_url + 'wp/dashboard/v1/community-events/location/me', {
+				method: 'GET',
+				data: requestParams,
+				dataType: 'json',
+				headers: {
+					'X-WP-Nonce': communityEventsData.rest_nonce
+				},
+				success: function( response ) {
+					var events   = response._embedded && response._embedded.events ? response._embedded.events[0] : [];
+					var location = response;
 
-				.done( function( response ) {
-					if ( 'no_location_available' === response.error ) {
-						if ( requestParams.location ) {
-							response.unknownCity = requestParams.location;
-						} else {
-							/*
-							 * No location was passed, which means that this was an automatic query
-							 * based on IP, locale, and timezone. Since the user didn't initiate it,
-							 * it should fail silently. Otherwise, the error could confuse and/or
-							 * annoy them.
-							 */
+					delete location._embedded;
+					delete location._links;
 
-							delete response.error;
-						}
+					app.renderEventsTemplate({
+						location: location,
+						events: events
+					}, initiatedBy );
+				},
+				error: function( xhr ) {
+					if ( xhr.responseJSON && 'rest_cannot_retrieve_user_location' === xhr.responseJSON.code && requestParams.location ) {
+						app.renderEventsTemplate({
+							unknownCity: requestParams.location,
+							location: false,
+							events: []
+						}, initiatedBy );
+
+						return;
 					}
-					app.renderEventsTemplate( response, initiatedBy );
-				})
 
-				.fail( function() {
 					app.renderEventsTemplate( {
 						'location' : false,
 						'error'    : true
 					}, initiatedBy );
-				});
+				},
+				complete: function() {
+					$spinner.removeClass( 'is-active' );
+				}
+			});
 		},
 
 		/**
