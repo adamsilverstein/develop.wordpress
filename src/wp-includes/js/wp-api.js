@@ -1179,11 +1179,10 @@
 
 						// Return a constructed url based on the parent and id.
 						url: function() {
-							var hasParent = ! _.isEmpty( parentName );
 							var url =
 								routeModel.get( 'apiRoot' ) +
 								routeModel.get( 'versionString' ) +
-								( hasParent ? ( parentName + '/' ) : '' ) +
+								parentName +  '/' +
 									( ( _.isUndefined( this.get( 'parent' ) ) || 0 === this.get( 'parent' ) ) ?
 										( _.isUndefined( this.get( 'parent_post' ) ) ? '' : this.get( 'parent_post' ) + '/' ) :
 										this.get( 'parent' ) + '/' ) +
@@ -1276,7 +1275,7 @@
 										.replace( routeModel.get( 'versionString' ), '' )
 										.replace( routeName, '' )
 										.slice( 1 );
-console.log( remainder );
+
 				// If the collection has a parent in its route, add that to its class name.
 				if ( '' !== parentName && parentName !== routeName && routeModel.get( 'versionString' ) !== parentName ) {
 
@@ -1374,8 +1373,8 @@ console.log( remainder );
 		var endpoint, attributes = {}, deferred, promise;
 
 		args                     = args || {};
-		attributes.apiRoot       = args.apiRoot || wpApiSettings.root || defaultApiRoot;
-		attributes.versionString = args.versionString || wpApiSettings.versionString || wp.api.defaultVersionString;
+		attributes.apiRoot       = args.apiRoot || wpApiSettings.root || '/wp-json';
+		attributes.versionString = args.versionString || wpApiSettings.versionString || 'wp/v2/';
 		attributes.schema        = args.schema || null;
 		if ( ! attributes.schema && attributes.apiRoot === wpApiSettings.root && attributes.versionString === wpApiSettings.versionString ) {
 			attributes.schema = wpApiSettings.schema;
@@ -1403,9 +1402,6 @@ console.log( remainder );
 		}
 		return initializedDeferreds[ attributes.apiRoot + attributes.versionString ];
 	};
-
-	wp.api.defaultApiRoot       = '/wp-json';
-	wp.api.defaultVersionString = 'wp/v2/';
 
 	/**
 	 * Construct the default endpoints and add to an endpoints collection.
