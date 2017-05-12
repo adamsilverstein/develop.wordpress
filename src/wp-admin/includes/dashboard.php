@@ -144,7 +144,8 @@ function wp_get_community_events_script_data() {
 	$events_client = new WP_Community_Events( $user_id, $user_location );
 
 	$script_data = array(
-		'nonce' => wp_create_nonce( 'community_events' ),
+		'rest_url' => rest_url( '/' ),
+		'rest_nonce' => wp_create_nonce( 'wp_rest' ),
 		'cache' => $events_client->get_cached_events(),
 
 		'l10n' => array(
@@ -1243,7 +1244,7 @@ function wp_print_community_events_templates() {
 		<?php printf(
 			/* translators: %s is a placeholder for the name of a city. */
 			__( 'Attend an upcoming event near %s.' ),
-			'<strong>{{ data.location }}</strong>'
+			'<strong>{{ data.location.description }}</strong>'
 		); ?>
 	</script>
 
@@ -1265,12 +1266,14 @@ function wp_print_community_events_templates() {
 					</div>
 				</div>
 
-				<div class="event-date-time">
-					<span class="event-date">{{ event.formatted_date }}</span>
-					<# if ( 'meetup' === event.type ) { #>
-						<span class="event-time">{{ event.formatted_time }}</span>
-					<# } #>
-				</div>
+				<# if ( event.date && event.date.formatted ) { #>
+					<div class="event-date-time">
+						<span class="event-date">{{ event.date.formatted.date }}</span>
+						<# if ( 'meetup' === event.type ) { #>
+							<span class="event-time">{{ event.date.formatted.time }}</span>
+						<# } #>
+					</div>
+				<# } #>
 			</li>
 		<# } ) #>
 	</script>
@@ -1280,7 +1283,7 @@ function wp_print_community_events_templates() {
 			<?php printf(
 				/* translators: 1: the city the user searched for, 2: meetup organization documentation URL */
 				__( 'There aren&#8217;t any events scheduled near %1$s at the moment. Would you like to <a href="%2$s">organize one</a>?' ),
-				'{{data.location}}',
+				'{{data.location.description}}',
 				__( 'https://make.wordpress.org/community/handbook/meetup-organizer/welcome/' )
 			); ?>
 		</li>
