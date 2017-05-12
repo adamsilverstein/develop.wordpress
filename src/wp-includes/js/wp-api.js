@@ -1270,8 +1270,12 @@
 				// Extract the name and any parent from the route.
 				var collectionClassName, modelClassName,
 						routeName  = collectionRoute.index.slice( collectionRoute.index.lastIndexOf( '/' ) + 1 ),
-						parentName = wp.api.utils.extractRoutePart( collectionRoute.index, 1, routeModel.get( 'versionString' ), false );
-
+						parentName = wp.api.utils.extractRoutePart( collectionRoute.index, 1, routeModel.get( 'versionString' ), false ),
+						remainder  = collectionRoute.index
+										.replace( routeModel.get( 'versionString' ), '' )
+										.replace( routeName, '' )
+										.slice( 1 );
+console.log( remainder );
 				// If the collection has a parent in its route, add that to its class name.
 				if ( '' !== parentName && parentName !== routeName && routeModel.get( 'versionString' ) !== parentName ) {
 
