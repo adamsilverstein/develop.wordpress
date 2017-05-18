@@ -34,7 +34,8 @@ jQuery(document).ready( function($) {
 
 	$timestampdiv.find('.save-timestamp').click( function( event ) { // crazyhorse - multiple ok cancels
 		var aa = $('#aa').val(), mm = $('#mm').val(), jj = $('#jj').val(), hh = $('#hh').val(), mn = $('#mn').val(),
-			newD = new Date( aa, mm - 1, jj, hh, mn );
+			newD = new Date( aa, mm - 1, jj, hh, mn ),
+			commentTime;
 
 		event.preventDefault();
 
@@ -45,14 +46,17 @@ jQuery(document).ready( function($) {
 			$timestampwrap.removeClass( 'form-invalid' );
 		}
 
+		commentTime = commentL10n.timeFormat
+			.replace( '%1$s', ( '00' + hh ).slice( -2 ) )
+			.replace( '%2$s', ( '00' + mn ).slice( -2 ) );
+
 		$timestamp.html(
 			commentL10n.submittedOn + ' <b>' +
 			commentL10n.dateFormat
 				.replace( '%1$s', $( 'option[value="' + mm + '"]', '#mm' ).attr( 'data-text' ) )
 				.replace( '%2$s', parseInt( jj, 10 ) )
 				.replace( '%3$s', aa )
-				.replace( '%4$s', ( '00' + hh ).slice( -2 ) )
-				.replace( '%5$s', ( '00' + mn ).slice( -2 ) ) +
+				.replace( '%4$s', commentTime ) +
 				'</b> '
 		);
 

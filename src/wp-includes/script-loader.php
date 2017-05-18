@@ -556,8 +556,10 @@ function wp_default_scripts( &$scripts ) {
 			'publishOn' => __('Publish on:'),
 			'publishOnFuture' =>  __('Schedule for:'),
 			'publishOnPast' => __('Published on:'),
-			/* translators: 1: month, 2: day, 3: year, 4: hour, 5: minute */
-			'dateFormat' => __('%1$s %2$s, %3$s @ %4$s:%5$s'),
+			/* translators: 1: month, 2: day, 3: year, 4: time */
+			'dateFormat' => __( '%1$s %2$s, %3$s @ %4$s' ),
+			/* translators: 1: hour, 2: minute */
+			'timeFormat' => __( '%1$s:%2$s' ),
 			'showcomm' => __('Show more comments'),
 			'endcomm' => __('No more comments found.'),
 			'publish' => __('Publish'),
@@ -595,8 +597,10 @@ function wp_default_scripts( &$scripts ) {
 		$scripts->add_data( 'comment', 'group', 1 );
 		did_action( 'init' ) && $scripts->localize( 'comment', 'commentL10n', array(
 			'submittedOn' => __( 'Submitted on:' ),
-			/* translators: 1: month, 2: day, 3: year, 4: hour, 5: minute */
-			'dateFormat' => __( '%1$s %2$s, %3$s @ %4$s:%5$s' )
+			/* translators: 1: month, 2: day, 3: year, 4: time */
+			'dateFormat' => __( '%1$s %2$s, %3$s @ %4$s' ),
+			/* translators: 1: hour, 2: minute */
+			'timeFormat' => __( '%1$s:%2$s' ),
 		) );
 
 		$scripts->add( 'admin-gallery', "/wp-admin/js/gallery$suffix.js", array( 'jquery-ui-sortable' ) );

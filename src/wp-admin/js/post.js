@@ -720,7 +720,8 @@ jQuery(document).ready( function($) {
 
 			var attemptedDate, originalDate, currentDate, publishOn, postStatus = $('#post_status'),
 				optPublish = $('option[value="publish"]', postStatus), aa = $('#aa').val(),
-				mm = $('#mm').val(), jj = $('#jj').val(), hh = $('#hh').val(), mn = $('#mn').val();
+				mm = $('#mm').val(), jj = $('#jj').val(), hh = $('#hh').val(), mn = $('#mn').val(),
+				publishTime;
 
 			attemptedDate = new Date( aa, mm - 1, jj, hh, mn );
 			originalDate = new Date( $('#hidden_aa').val(), $('#hidden_mm').val() -1, $('#hidden_jj').val(), $('#hidden_hh').val(), $('#hidden_mn').val() );
@@ -751,14 +752,17 @@ jQuery(document).ready( function($) {
 				// Re-set to the current value.
 				$('#timestamp').html(stamp);
 			} else {
+				publishTime = postL10n.timeFormat
+						.replace( '%1$s', ( '00' + hh ).slice( -2 ) )
+						.replace( '%2$s', ( '00' + mn ).slice( -2 ) );
+
 				$('#timestamp').html(
 					'\n' + publishOn + ' <b>' +
 					postL10n.dateFormat
 						.replace( '%1$s', $( 'option[value="' + mm + '"]', '#mm' ).attr( 'data-text' ) )
 						.replace( '%2$s', parseInt( jj, 10 ) )
 						.replace( '%3$s', aa )
-						.replace( '%4$s', ( '00' + hh ).slice( -2 ) )
-						.replace( '%5$s', ( '00' + mn ).slice( -2 ) ) +
+						.replace( '%4$s', publishTime ) +
 						'</b> '
 				);
 			}
