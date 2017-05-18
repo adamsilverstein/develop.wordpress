@@ -164,6 +164,7 @@ $admin_body_class .= ' version-' . str_replace( '.', '-', preg_replace( '/^([.0-
 $admin_body_class .= ' admin-color-' . sanitize_html_class( get_user_option( 'admin_color' ), 'fresh' );
 $admin_body_class .= ' locale-' . sanitize_html_class( strtolower( str_replace( '_', '-', get_user_locale() ) ) );
 
+// The 'mobile' body class is unreliable because `wp_is_mobile` relies on user-agent sniffing.
 if ( wp_is_mobile() )
 	$admin_body_class .= ' mobile';
 

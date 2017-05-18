@@ -9,6 +9,7 @@
 /** WordPress Administration Bootstrap */
 require_once( dirname( __FILE__ ) . '/admin.php' );
 
+// Mobile devices don't need `mediaelement` to handle media.
 if ( ! wp_is_mobile() ) {
 	wp_enqueue_style( 'wp-mediaelement' );
 	wp_enqueue_script( 'wp-mediaelement' );

@@ -89,6 +89,7 @@ _wp_admin_html_begin();
 
 $body_class = 'wp-core-ui wp-customizer js';
 
+// The 'mobile' body class is unreliable because `wp_is_mobile` relies on user-agent sniffing.
 if ( wp_is_mobile() ) :
 	$body_class .= ' mobile';
 
